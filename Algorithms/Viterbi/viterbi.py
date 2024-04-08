@@ -5,9 +5,7 @@ class ViterbiAlgorithm():
     def __init__(self, ngram) -> None:
         self.wordLikelihood = {}
         self.transitionMatrix = {"Begin_Sent": {}, "End_Sent": {}}
-        self.ngram = ngram # the n-gram number of the item
-        # the current ngram as implemented is only 2
-        # i,e it only looks at the prev item not the prev n 
+        self.ngram = ngram
         
     def _normalizeProbabilities(matrix):
         for aRow in matrix:
@@ -16,8 +14,10 @@ class ViterbiAlgorithm():
                 matrix[aRow][elem] /= count
         return matrix
 
-    def fillMatrices(self, filePath):
-        
+
+    def trainViterbi(self, filePath):
+        # essentially training the viterbi algorithm with the training file
+
         with open(filePath, "r", encoding="utf8") as trainingTxt:
             prevDiacritic = "Begin_Sent" # this is the previous diacritic which is begin sent in this case
             # this could possibly be changed to begin word?
@@ -51,15 +51,6 @@ class ViterbiAlgorithm():
 
         self.wordLikeLihood = self._normalizeProbabilities(self.wordLikelihood) # normalzing everything
         self.transitionMatrix = self._normalizeProbabilities(self.transitionMatrix) # normalizing everything to probabilities
-
-
-    def _create_letter_set(word_likelihood_matrix):
-        word_set = set()
-        for pos in word_likelihood_matrix:
-            for word in word_likelihood_matrix[pos]:
-                word_set.add(word)
-        return word_set
-
     
     def _createStateIndices(transitionMatrix):
         stateIndices = {}
@@ -100,34 +91,52 @@ class ViterbiAlgorithm():
 
         bestPath.reverse()
         return bestPath
+    
 
-
-
-    def viterbiAlgorithm(self, testFilePath, resultsPath):
+    def runViterbiAlgorithm(self, testFilePath, resultsPath):
 
         sentencesArray = self.readTestFile(testFilePath)
+        # gets me all the sentences in the test file
         stateIndices = self._createStateIndices(self.transitionMatrix)
+        # gets me all the indexes of the states
         states = list(self.transitionMatrix.keys())
-        
+        # gets me all the states
         writeFile = open(resultsPath, "w", encoding="utf-8")
+        # the file to write the results to 
+        unknownWordProb = 1/500000
 
-        unknownWordProb = 1/5000000
-        
         for sentence in sentencesArray: # going through a single sentence
 
             # initializing viterbi
-            firstWord = sentence[0]
+            firstLetter = sentence[0]
+            # the first letter in the sentence that will be used to see the transition from beginsent to that letter
+
             viterbiMatrix = [[0 for _ in range(len(sentence) + 2)] for _ in range(len(states))]
+            # creating the matrix with the states
             backpointer = [[0 for _ in range(len(sentence) + 2)] for _ in range(len(states))]
+            # the backpointer matrix to find the best path
             viterbiMatrix[0][0] = 1
+            # the probability of starting will always be one, technically i could make this a big number and it wouldnt matter
+            # i might try that
+
+
+            # this block finds the probabilities of going from the beginning of a sentence to 
+            # the next particular state and letter combo
             for index in list(stateIndices.keys()):
-                POS = stateIndices[index]
-                viterbiMatrix[index][1] = self.transitionMatrix["Begin_Sent"].get(POS, 0) * self.wordLikeLihood.get(POS, {}).get(firstWord, unknownWordProb)
-            # done init viterbi
-            
+                state = stateIndices[index]
+                # this is the state represented by that index
+
+                # the probability of that state going from beginning to that letter 
+                viterbiMatrix[index][1] = self.transitionMatrix["Begin_Sent"].get(state, 0) * self.wordLikeLihood.get(state, {}).get(firstLetter, unknownWordProb)
+               
+            # done init viterbi for the begin sentences
+
+            # this block fills in the rest of the viterbi algorithm
+            # this is where the n-gram can be done
             for j in range(1, len(sentence)):
                 # going through the sentence aka the words
-                word = sentence[j] # making the word (lower.case) which might be the issue
+                letter = sentence[j] # making the word (lower.case) which might be the issue
+                # the letter in the currente viterbi algo
 
                 for i, state in enumerate(states):
                     # the rows
@@ -136,28 +145,45 @@ class ViterbiAlgorithm():
                     # finding prev state that maximizes
                     for k, prevState in enumerate(states): # going through all previous states
                         transitionProb = self.transitionMatrix.get(prevState, {}).get(state, 0)
-                        prevProb = viterbiMatrix[k][j]
+                        # i will find the prevN prob of a word showing up. 
+                        prevNProb = 1
+                        # here is the previous probability implemented as an ngram model focusing on the previous states
+                        for i in range(self.ngram):
+                            if  j - i >= 0:
+                                prevNProb *= viterbiMatrix[k][j - i]
+                                # this grabs the previous n probabilities as long as were not out of bounds
                         currProb = prevProb * transitionProb
-
+                        
+                        # here is the curr probability that may be added to viterbi depending on its value
                         if currProb > maxProb:
                             maxProb = currProb
                             backpointer[i][j + 1] = k
+                            # adding in the max possible probability to the backpoitner
 
 
-                    viterbiMatrix[i][j + 1] = maxProb * self.wordLikeLihood.get(state, {}).get(word, unknownWordProb)
+                    viterbiMatrix[i][j + 1] = maxProb * self.wordLikeLihood.get(state, {}).get(letter, unknownWordProb)
+                    # adding in the transition probabiltiy alongside the viterbi
 
-
-            # capturing end state here
+            # capturing end state here for the backpointer matrix alongisde the n-grams
             for i, state in enumerate(states):
                 maxProb = 0
                 for k, prevState in enumerate(states):  # going through all previous states
                     transitionProb = self.transitionMatrix.get(prevState, {}).get(state, 0)
-                    prevProb = viterbiMatrix[k][len(sentence)] 
-                    currProb = prevProb * transitionProb
+                    
+                    lastIdx = len(sentence)
+                    prevNProb = 1
+                    # here is the previous probability implemented as an ngram model focusing on the previous entries 
+                    # in the viterbi by accumulating them into an N-gram based model through the last IDX
+                    for i in range(self.ngram):
+                        if  lastIdx - i >= 0:
+                            prevNProb *= viterbiMatrix[k][lastIdx - i]
+
+                    currProb = prevNProb * transitionProb
+                    # the previous N probabilties 
                     if currProb > maxProb:
                         maxProb = currProb
-                        backpointer[i][len(sentence) + 1] = k
-                    viterbiMatrix[i][len(sentence) + 1] = maxProb
+                        backpointer[i][lastIdx + 1] = k
+                    viterbiMatrix[i][lastIdx + 1] = maxProb
             # done capturing end state
             
             bestPath = self._find_best_path(backpointer, stateIndices)
@@ -165,5 +191,7 @@ class ViterbiAlgorithm():
 
                 writeFile.write(sentence[i] + "\t" + bestPath[i] + "\n")
             writeFile.write("\n")
+            # writing to the results file by getting the best path 
+
 
         writeFile.close()
