@@ -7,7 +7,7 @@ class ViterbiAlgorithm():
         self.transitionMatrix = {"Begin_Sent": {}, "End_Sent": {}}
         self.ngram = ngram
         
-    def _normalizeProbabilities(matrix):
+    def _normalizeProbabilities(self, matrix):
         for aRow in matrix:
             count = sum(matrix[aRow].values())
             for elem in matrix[aRow]:
@@ -35,9 +35,10 @@ class ViterbiAlgorithm():
                     row = trainingTxt.readline() # got my new row
                     continue
                     # making sure row isnt a new line again
-                    
-                letter, Diacritic = row.strip().split("\t") # splitting to get the letter and the diacritic
+                letter, Diacritic =  row.rstrip().split("\t")
+               
                 # updating word likelihoood matrix
+                prevPOS = Diacritic
 
                 self.wordLikelihood.setdefault(Diacritic, {}).setdefault(letter, 0)
                 # how often that letter in that diacritic shows up
@@ -46,13 +47,12 @@ class ViterbiAlgorithm():
                 self.transitionMatrix.setdefault(prevPOS, {}).setdefault(Diacritic, 0)
                 self.transitionMatrix[prevPOS][Diacritic] += 1
 
-                prevPOS = Diacritic
                 row = trainingTxt.readline()
 
         self.wordLikeLihood = self._normalizeProbabilities(self.wordLikelihood) # normalzing everything
         self.transitionMatrix = self._normalizeProbabilities(self.transitionMatrix) # normalizing everything to probabilities
     
-    def _createStateIndices(transitionMatrix):
+    def _createStateIndices(self, transitionMatrix):
         stateIndices = {}
         states = list(transitionMatrix.keys())
 
@@ -62,7 +62,7 @@ class ViterbiAlgorithm():
         # initializing state indices
     
 
-    def readTestFile(devPath):
+    def readTestFile(self, devPath):
         sentencesArray = []
 
         with open(devPath, "r", encoding="utf-8") as devFile:
@@ -79,7 +79,7 @@ class ViterbiAlgorithm():
         return sentencesArray
 
 
-    def _find_best_path(backpointer, stateIndices):
+    def _find_best_path(self, backpointer, stateIndices):
         # Start with the state that has the highest probability at the end of the sequence
         bestItemEnd = backpointer[1][-1] # this is the end column bestItem
         bestPath = [stateIndices[bestItemEnd]]
@@ -108,7 +108,12 @@ class ViterbiAlgorithm():
         for sentence in sentencesArray: # going through a single sentence
 
             # initializing viterbi
-            firstLetter = sentence[0]
+            firstLetter = ''
+            try:
+                firstLetter = sentence[0]
+            except IndexError:
+                print("Exception occured indexs error in the sntence")
+                print("Sentence was ", sentence)
             # the first letter in the sentence that will be used to see the transition from beginsent to that letter
 
             viterbiMatrix = [[0 for _ in range(len(sentence) + 2)] for _ in range(len(states))]
@@ -152,7 +157,7 @@ class ViterbiAlgorithm():
                             if  j - i >= 0:
                                 prevNProb *= viterbiMatrix[k][j - i]
                                 # this grabs the previous n probabilities as long as were not out of bounds
-                        currProb = prevProb * transitionProb
+                        currProb = prevNProb * transitionProb
                         
                         # here is the curr probability that may be added to viterbi depending on its value
                         if currProb > maxProb:
@@ -188,7 +193,6 @@ class ViterbiAlgorithm():
             
             bestPath = self._find_best_path(backpointer, stateIndices)
             for i in range(len(sentence)):
-
                 writeFile.write(sentence[i] + "\t" + bestPath[i] + "\n")
             writeFile.write("\n")
             # writing to the results file by getting the best path 
