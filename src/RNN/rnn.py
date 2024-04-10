@@ -15,10 +15,10 @@ data = [line.split('\t') for line in lines if line]
 # Create mappings
 consonants = sorted(set(pair[0] for pair in data))
 vowels = sorted(set(pair[1] for pair in data))
-cons_to_int = {char: i for i, char in enumerate(consonants)}
-vowel_to_int = {mark: i for i, mark in enumerate(vowels)}
-int_to_cons = {i: char for char, i in cons_to_int.items()}
-int_to_vowel = {i: mark for mark, i in vowel_to_int.items()}
+cons_to_int = {cons: i for i, cons in enumerate(consonants)}
+vowel_to_int = {vowel: i for i, vowel in enumerate(vowels)}
+int_to_cons = {i: cons for cons, i in cons_to_int.items()}
+int_to_vowel = {i: vowel for vowel, i in vowel_to_int.items()}
 
 # Separate letters and marks
 consonants = [cons_to_int[pair[0]] for pair in data]
