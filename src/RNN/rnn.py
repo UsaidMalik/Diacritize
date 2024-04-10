@@ -2,6 +2,7 @@ import numpy as np
 from keras.models import Sequential
 from keras.layers import Dense, LSTM, Embedding
 from keras.utils import to_categorical
+from keras.layers import Bidirectional
 
 training_file_path = './data/Parsed Data/quran-letter.txt'
 
@@ -10,7 +11,7 @@ with open(training_file_path, 'r', encoding='utf-8') as f:
     lines = f.read().split('\n')
 
 # Split each line into a letter and a mark
-data = [line.split('\t') for line in lines if line]
+data = [line.split('\t') for line in lines if line][:450839]
 
 # Create mappings
 consonants = sorted(set(pair[0] for pair in data))
@@ -30,12 +31,14 @@ consonants = to_categorical(consonants, num_classes=num_classes)
 
 # Define your model
 model = Sequential()
-model.add(LSTM(64, input_shape=(1, num_classes)))
+model.add(Bidirectional(LSTM(64, return_sequences=True), input_shape=(1, num_classes)))
+model.add(Bidirectional(LSTM(64, return_sequences=True)))
+model.add(Bidirectional(LSTM(64)))
 model.add(Dense(len(vowel_to_int), activation='softmax'))
 
 # Compile and train your model
 model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(consonants.reshape((-1, 1, num_classes)), np.array(vowels), epochs=1, batch_size=64)
+model.fit(consonants.reshape((-1, 1, num_classes)), np.array(vowels), epochs=1, batch_size=32)
 
 # Predict marks for new text
 new_text = "اللغة العربية"
