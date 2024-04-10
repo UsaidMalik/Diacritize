@@ -1,6 +1,6 @@
 import numpy as np
 from keras.models import Sequential
-from keras.layers import Dense, LSTM, Embedding
+from keras.layers import Dense, LSTM
 from keras.utils import to_categorical
 from keras.layers import Bidirectional
 
@@ -41,7 +41,7 @@ model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=
 model.fit(consonants.reshape((-1, 1, num_classes)), np.array(vowels), epochs=1, batch_size=32)
 
 # Predict marks for new text
-new_text = "اللغة العربية"
+new_text = "فإن لم يكونا كذلك أتى بما يقتضيه الحال وهذا أولى"
 new_sequences = [cons_to_int[char] for char in new_text]
 new_data = to_categorical([new_sequences], num_classes=num_classes)
 predictions = model.predict(new_data.reshape((-1, 1, num_classes)))
@@ -49,6 +49,6 @@ predicted_vowels = [int_to_vowel[i] for i in np.argmax(predictions, axis=1)]
 
 # Print the predicted diacritized phrase
 diacritized_phrase = ''
-for char, mark in zip(new_text, predicted_vowels):
-    diacritized_phrase += char + mark
+for cons, vowel in zip(new_text, predicted_vowels):
+    diacritized_phrase += cons + vowel
 print(diacritized_phrase)
