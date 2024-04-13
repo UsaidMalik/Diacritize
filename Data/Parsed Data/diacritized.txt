@@ -1,23 +1,23 @@
-ب	ِ
-س	Begin_Sent
-م	Begin_Sent
+ب	َ
+س	َ
+م	
 
 ا	
-ل	Begin_Sent
-ل	Begin_Sent
-ه	Begin_Sent
+ل	َ
+ل	ْ
+ه	
 
 ا	
-ل	Begin_Sent
-ر	Begin_Sent
-ح	Begin_Sent
-م	Begin_Sent
-ن	Begin_Sent
+ل	َ
+ر	َ
+ح	ْ
+م	َ
+ن	
 
 ا	
-ل	Begin_Sent
-ر	Begin_Sent
-ح	Begin_Sent
-ي	Begin_Sent
-م	Begin_Sent
+ل	َ
+ر	ْ
+ح	َ
+ي	
+م	
 
