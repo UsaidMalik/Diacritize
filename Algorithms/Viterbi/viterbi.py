@@ -1,5 +1,6 @@
 import copy
 import sys
+import pprint
 
 class ViterbiAlgorithm():
     def __init__(self, ngram) -> None:
@@ -23,35 +24,42 @@ class ViterbiAlgorithm():
             # this could possibly be changed to begin word?
             # i dont think thats a good idea tho since word inflection depends on other words as well as letters
             row = trainingTxt.readline() # starting seed value
+            print(row)
             while row:
-                if row == "\n": # if i have reached the end of the sentence i need to do the new stuff
+                if row.strip() == "ENDAYAT": # if i have reached the end of the sentence i need to do the new stuff
                     # checking to see if the previous POS exists in the transition matrix
                     self.transitionMatrix.setdefault(prevDiacritic, {}).setdefault("End_Sent", 0)
                     # the transition matrix gets the prev diacritic and the transition state from that value
                     self.transitionMatrix[prevDiacritic]["End_Sent"] += 1
                     # the transitions are updated but this doesnt really help tbh
                     prevDiacritic = "Begin_Sent"
+                    # back to begin sent
                     # the the prev diacritic is begin sent
                     row = trainingTxt.readline() # got my new row
                     continue
+
+                letter, Diacritic = "", ""
+                if row.strip() != "":
+                    letter, Diacritic =  row.split("\t")
                     # making sure row isnt a new line again
-                letter, Diacritic =  row.rstrip().split("\t")
-               
+                letter = letter.strip()
                 # updating word likelihoood matrix
-                prevPOS = Diacritic
+                Diacritic = Diacritic.strip()
 
                 self.wordLikelihood.setdefault(Diacritic, {}).setdefault(letter, 0)
-                # how often that letter in that diacritic shows up
                 self.wordLikelihood[Diacritic][letter] += 1
                 # incrementing the letter
-                self.transitionMatrix.setdefault(prevPOS, {}).setdefault(Diacritic, 0)
-                self.transitionMatrix[prevPOS][Diacritic] += 1
+                self.transitionMatrix.setdefault(prevDiacritic, {}).setdefault(Diacritic, 0)
+                self.transitionMatrix[prevDiacritic][Diacritic] += 1
 
+                prevDiacritic = Diacritic
                 row = trainingTxt.readline()
-
+            
         self.wordLikeLihood = self._normalizeProbabilities(self.wordLikelihood) # normalzing everything
         self.transitionMatrix = self._normalizeProbabilities(self.transitionMatrix) # normalizing everything to probabilities
-    
+        pprint.pprint(self.wordLikeLihood)
+        pprint.pprint(self.transitionMatrix)
+
     def _createStateIndices(self, transitionMatrix):
         stateIndices = {}
         states = list(transitionMatrix.keys())
@@ -61,6 +69,9 @@ class ViterbiAlgorithm():
         return stateIndices
         # initializing state indices
     
+    def _printViterbi(self, viterbiMatrix):
+        for row in viterbiMatrix:
+            print(row)
 
     def readTestFile(self, devPath):
         sentencesArray = []
@@ -71,7 +82,7 @@ class ViterbiAlgorithm():
             token = 1
             while token:
                 token = devFile.readline()
-                if token == "\n":
+                if token.strip() == "":
                     sentencesArray.append(tokens)
                     tokens = []
                 else:
@@ -94,7 +105,6 @@ class ViterbiAlgorithm():
     
 
     def runViterbiAlgorithm(self, testFilePath, resultsPath):
-
         sentencesArray = self.readTestFile(testFilePath)
         # gets me all the sentences in the test file
         stateIndices = self._createStateIndices(self.transitionMatrix)
@@ -104,6 +114,7 @@ class ViterbiAlgorithm():
         writeFile = open(resultsPath, "w", encoding="utf-8")
         # the file to write the results to 
         unknownWordProb = 1/500000
+        print(self.transitionMatrix)
 
         for sentence in sentencesArray: # going through a single sentence
 
@@ -164,9 +175,7 @@ class ViterbiAlgorithm():
                             maxProb = currProb
                             backpointer[i][j + 1] = k
                             # adding in the max possible probability to the backpoitner
-
-
-                    viterbiMatrix[i][j + 1] = maxProb * self.wordLikeLihood.get(state, {}).get(letter, unknownWordProb)
+                    viterbiMatrix[i][j + 1] = maxProb
                     # adding in the transition probabiltiy alongside the viterbi
 
             # capturing end state here for the backpointer matrix alongisde the n-grams
@@ -190,7 +199,8 @@ class ViterbiAlgorithm():
                         backpointer[i][lastIdx + 1] = k
                     viterbiMatrix[i][lastIdx + 1] = maxProb
             # done capturing end state
-            
+           # self._printViterbi(viterbiMatrix)
+            #self._printViterbi(backpointer)
             bestPath = self._find_best_path(backpointer, stateIndices)
             for i in range(len(sentence)):
                 writeFile.write(sentence[i] + "\t" + bestPath[i] + "\n")
