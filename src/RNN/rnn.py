@@ -1,17 +1,16 @@
 import numpy as np
+from keras.layers import LSTM, Bidirectional, Dense
 from keras.models import Sequential
-from keras.layers import Dense, LSTM
 from keras.utils import to_categorical
-from keras.layers import Bidirectional
 
-training_file_path = './data/Parsed Data/quran-letter.txt'
+training_file_path = "./data/Parsed Data/quran-letter.txt"
 
 # Read the training file
-with open(training_file_path, 'r', encoding='utf-8') as f:
-    lines = f.read().split('\n')
+with open(training_file_path, "r", encoding="utf-8") as f:
+    lines = f.read().split("\n")
 
 # Split each line into a letter and a mark
-data = [line.split('\t') for line in lines if line][:450839]
+data = [line.split("\t") for line in lines if line][:450839]
 
 # Create mappings
 consonants = sorted(set(pair[0] for pair in data))
@@ -34,11 +33,15 @@ model = Sequential()
 model.add(Bidirectional(LSTM(64, return_sequences=True), input_shape=(1, num_classes)))
 model.add(Bidirectional(LSTM(64, return_sequences=True)))
 model.add(Bidirectional(LSTM(64)))
-model.add(Dense(len(vowel_to_int), activation='softmax'))
+model.add(Dense(len(vowel_to_int), activation="softmax"))
 
 # Compile and train your model
-model.compile(loss='sparse_categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
-model.fit(consonants.reshape((-1, 1, num_classes)), np.array(vowels), epochs=1, batch_size=32)
+model.compile(
+    loss="sparse_categorical_crossentropy", optimizer="adam", metrics=["accuracy"]
+)
+model.fit(
+    consonants.reshape((-1, 1, num_classes)), np.array(vowels), epochs=1, batch_size=32
+)
 
 # Predict marks for new text
 new_text = "فإن لم يكونا كذلك أتى بما يقتضيه الحال وهذا أولى"
@@ -48,7 +51,8 @@ predictions = model.predict(new_data.reshape((-1, 1, num_classes)))
 predicted_vowels = [int_to_vowel[i] for i in np.argmax(predictions, axis=1)]
 
 # Print the predicted diacritized phrase
-diacritized_phrase = ''
+diacritized_phrase = ""
 for cons, vowel in zip(new_text, predicted_vowels):
     diacritized_phrase += cons + vowel
 print(diacritized_phrase)
+
