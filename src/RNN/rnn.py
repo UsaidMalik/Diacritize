@@ -3,14 +3,14 @@ from keras.layers import LSTM, Bidirectional, Dense
 from keras.models import Sequential
 from keras.utils import to_categorical
 
-training_file_path = "./data/Parsed Data/quran-letter.txt"
+training_file_path = "./Data/Parsed Data/test-training-set.txt"
 
 # Read the training file
 with open(training_file_path, "r", encoding="utf-8") as f:
     lines = f.read().split("\n")
 
 # Split each line into a letter and a mark
-data = [line.split("\t") for line in lines if line][:450839]
+data = [line.split("\t") for line in lines if line]
 
 # Create mappings
 consonants = sorted(set(pair[0] for pair in data))
@@ -55,4 +55,3 @@ diacritized_phrase = ""
 for cons, vowel in zip(new_text, predicted_vowels):
     diacritized_phrase += cons + vowel
 print(diacritized_phrase)
-
