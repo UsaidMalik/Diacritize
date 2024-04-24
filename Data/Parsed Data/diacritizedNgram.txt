@@ -1,0 +1,6 @@
+بسم	Begin_Sent
+اللّه	Begin_Sent
+الرّحمـٰن	Begin_Sent
+الرّحيم	Begin_Sent
+ENDAYAT	Begin_Sent
+

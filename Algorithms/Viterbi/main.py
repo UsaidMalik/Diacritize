@@ -1,6 +1,8 @@
+from unigramviterbi import UnigramViterbiAlgorithm
 from viterbi import ViterbiAlgorithm
 
-viterbi = ViterbiAlgorithm(2)
+viterbiNGram = ViterbiAlgorithm(1)
 
-viterbi.trainViterbi("../../Data/Parsed Data/training.txt")
-viterbi.runViterbiAlgorithm("../../Data/Parsed Data/single-line.txt", "../../Data/Parsed Data/diacritized.txt")
+viterbiNGram.trainViterbi("../../Data/Parsed Data/single-word-training.txt")
+
+viterbiNGram.runViterbiAlgorithm("../../Data/Parsed Data/ngramtest.txt", "../../Data/Parsed Data/diacritizedNgram.txt")
