@@ -2,7 +2,6 @@ from pyarabic import araby
 import sys
 # documentation https://github.com/linuxscout/pyarabic/blob/master/doc/features.md
 
-
 trainingFilePath = sys.argv[2]
 originalDataPath = sys.argv[1]
 trainingfile = open(trainingFilePath, "w", encoding='utf-8')
