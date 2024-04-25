@@ -48,7 +48,7 @@ model.fit(
 )
 
 # Predict marks for new text
-new_text = "بسم الله الرحمن الرحيم قل هو الله احد"
+new_text = "بسم الله الرحمن الرحيم قل هو الله احمد"
 new_sequences = [cons_to_int[char] for char in new_text]
 new_data = to_categorical([new_sequences], num_classes=num_classes)
 predictions = model.predict(new_data.reshape((-1, 1, num_classes)))
