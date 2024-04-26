@@ -5,7 +5,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8297780b-8864-480c-a450-edc448801626" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/src/RNN/rnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/RNN/rnn.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/RNN/letter-training-rnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/RNN/letter-training-rnn.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -68,6 +68,7 @@
       <updated>1712687454325</updated>
       <workItem from="1712687455369" duration="1300000" />
       <workItem from="1712708357406" duration="2482000" />
+      <workItem from="1714129618566" duration="33000" />
     </task>
     <servers />
   </component>
