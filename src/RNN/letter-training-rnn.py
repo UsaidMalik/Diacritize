@@ -36,7 +36,8 @@ int_to_cons = {i: char for char, i in cons_to_int.items()}
 int_to_vowel = {i: diacritic for diacritic, i in vowel_to_int.items()}
 
 # Convert data into sequences
-max_seq_length = max(len(pair[0]) for pair in data)
+# max_seq_length = max(len(pair[0]) for pair in data)
+max_seq_length = 6
 X_sequences = []
 Y_sequences = []
 
@@ -60,50 +61,86 @@ Y_encoded = to_categorical(Y_sequences, num_classes=len(vowel_to_int) + 1)
 model = Sequential()
 model.add(
     Bidirectional(
-        LSTM(64, return_sequences=True, dropout=0.2),
+        LSTM(32, return_sequences=True, dropout=0.2, dtype="float32"),
         input_shape=(max_seq_length, len(cons_to_int) + 1),
     )
 )
 model.add(TimeDistributed(Dense(len(vowel_to_int) + 1, activation="softmax")))
 
+
 # Compile model
 model.compile(
     loss="categorical_crossentropy",
-    optimizer=Adam(learning_rate=0.02),
+    optimizer=Adam(learning_rate=0.03),
     metrics=["accuracy"],
 )
 
 # Fit model
-model.fit(X_encoded, Y_encoded, epochs=1, batch_size=64)
+model.fit(X_encoded, Y_encoded, epochs=1, batch_size=512)
 
-def predict_diacritics(text):
-    diacritized_words = []
-    words = text.split()  # Split the input text into words
+model.save("model.keras", overwrite=True)
 
-    for word in words:
-        X_sequence = [cons_to_int.get(char, 0) for char in word]
-        X_sequence = X_sequence + [padding_token] * (max_seq_length - len(X_sequence))
-        X_encoded = to_categorical([X_sequence], num_classes=len(cons_to_int) + 1)
+# def predict_diacritics(sentence):
+#     sentence_cleaned = sentence.replace(" ", "")  # Assuming no spaces needed for internal model processing
+#     X_sequence = [cons_to_int.get(char, cons_to_int['<PAD>']) for char in sentence_cleaned]
+#     X_padded = X_sequence + [cons_to_int['<PAD>']] * (max_seq_length - len(X_sequence))
+#     X_encoded = to_categorical([X_padded], num_classes=len(cons_to_int) + 1)
 
-        predictions = model.predict(X_encoded)[0]
-        predicted_vowels = []
-        for pred in predictions:
-            vowel_index = np.argmax(pred)
-            if vowel_index in int_to_vowel:
-                predicted_vowels.append(int_to_vowel[vowel_index])
-            else:
-                predicted_vowels.append("")
+#     print("Shape of X_encoded:", X_encoded.shape)  # Check input shape
 
-        diacritized_word = ""
-        for i, cons in enumerate(word):
-            vowel = predicted_vowels[i] if i < len(predicted_vowels) else ""
-            diacritized_word += cons + vowel
+#     predictions = model.predict(X_encoded)[0]
+#     print("Predictions:", predictions)  # See what the model is predicting
 
-        diacritized_words.append(diacritized_word)
+#     print("max index:", np.argmax(predictions, axis=1))
 
-    return " ".join(diacritized_words)
+#     predicted_vowels = [int_to_vowel[np.argmax(pred)] if np.argmax(pred) in int_to_vowel else "" for pred in predictions[:len(sentence_cleaned)]]
+#     print("Predicted Diacritics:", predicted_vowels)  # Check the diacritics being applied
+
+#     diacritized_sentence = ""
+#     idx = 0
+#     for char in sentence:
+#         if char == " ":
+#             diacritized_sentence += " "
+#         else:
+#             diacritized_sentence += char + predicted_vowels[idx]
+#             idx += 1
+
+#     return diacritized_sentence
+
+
+# # Example usage
+# new_text = "باربي هي رغبة رائعة للأطفال	باربي هي الرغبة الرهيبة للأطفال"
+# predicted_text = predict_diacritics(new_text)
+# print(predicted_text)
+
+
+def diacritize_text(text):
+    # Convert text into sequences
+    X_sequence = [cons_to_int.get(char, 0) for char in text]
+
+    # Pad sequence
+    max_seq_length = model.input_shape[1]
+    X_sequence = X_sequence + [padding_token] * (max_seq_length - len(X_sequence))
+
+    # Reshape and encode input
+    X_encoded = to_categorical([X_sequence], num_classes=len(cons_to_int) + 1)
+
+    # Predict diacritics
+    Y_pred = model.predict(X_encoded)
+
+    # Decode predicted diacritics
+    Y_decoded = np.argmax(Y_pred, axis=-1)[0]
+    diacritics = [int_to_vowel.get(i, "") for i in Y_decoded]
+
+    # Combine consonants and diacritics
+    diacritized_text = ""
+    for char, diacritic in zip(text, diacritics):
+        diacritized_text += char + diacritic
+
+    return diacritized_text
+
 
 # Example usage
-new_text = "بسم الله الرحمن الرحيم"
-predicted_text = predict_diacritics(new_text)
-print(predicted_text)
+new_text = "باربي هي رغبة رائعة للأطفال باربي هي الرغبة الرهيبة للأطفال"
+diacritized_text = diacritize_text(new_text)
+print("Diacritized text:", diacritized_text)
