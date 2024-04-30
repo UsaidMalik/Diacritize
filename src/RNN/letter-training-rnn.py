@@ -37,7 +37,7 @@ int_to_vowel = {i: diacritic for diacritic, i in vowel_to_int.items()}
 
 # Convert data into sequences
 # max_seq_length = max(len(pair[0]) for pair in data)
-max_seq_length = 6
+max_seq_length = 10
 X_sequences = []
 Y_sequences = []
 
@@ -141,6 +141,6 @@ def diacritize_text(text):
 
 
 # Example usage
-new_text = "باربي هي رغبة رائعة للأطفال باربي هي الرغبة الرهيبة للأطفال"
+new_text = "يحب التنزه في الحديقة مع سريره"
 diacritized_text = diacritize_text(new_text)
 print("Diacritized text:", diacritized_text)
