@@ -5,6 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="8297780b-8864-480c-a450-edc448801626" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/model.keras" beforeDir="false" afterPath="$PROJECT_DIR$/model.keras" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/RNN/letter-training-rnn.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/RNN/letter-training-rnn.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -53,8 +55,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-1d06a55b98c1-74d2a5396914-JavaScript-PY-241.14494.241" />
-        <option value="bundled-python-sdk-0509580d9d50-28c9f5db9ffe-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.14494.241" />
+        <option value="bundled-js-predefined-1d06a55b98c1-91d5c284f522-JavaScript-PY-241.15989.155" />
+        <option value="bundled-python-sdk-babbdf50b680-7c6932dee5e4-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-241.15989.155" />
       </set>
     </attachedChunks>
   </component>
@@ -69,6 +71,9 @@
       <workItem from="1712687455369" duration="1300000" />
       <workItem from="1712708357406" duration="2482000" />
       <workItem from="1714129618566" duration="33000" />
+      <workItem from="1714579620238" duration="2531000" />
+      <workItem from="1714621768518" duration="598000" />
+      <workItem from="1714933471506" duration="8000" />
     </task>
     <servers />
   </component>

@@ -36,8 +36,8 @@ int_to_cons = {i: char for char, i in cons_to_int.items()}
 int_to_vowel = {i: diacritic for diacritic, i in vowel_to_int.items()}
 
 # Convert data into sequences
-# max_seq_length = max(len(pair[0]) for pair in data)
-max_seq_length = 10
+max_seq_length = max(len(pair[0]) for pair in data)
+# max_seq_length = 20
 X_sequences = []
 Y_sequences = []
 
